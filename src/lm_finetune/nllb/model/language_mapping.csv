@@ -1,0 +1,210 @@
+Language,flores200_code,trimmed_code
+Acehnese (Arabic script),ace_Arab,ace
+Acehnese (Latin script),ace_Latn,ace
+Mesopotamian Arabic,acm_Arab,acm
+Taizzi-Adeni Arabic,acq_Arab,acq
+Tunisian Arabic,aeb_Arab,aeb
+Afrikaans,afr_Latn,afr
+South Levantine Arabic,ajp_Arab,ajp
+Akan,aka_Latn,aka
+Amharic,amh_Ethi,amh
+North Levantine Arabic,apc_Arab,apc
+Modern Standard Arabic,arb_Arab,arb
+Modern Standard Arabic (Romanized),arb_Latn,arb
+Najdi Arabic,ars_Arab,ars
+Moroccan Arabic,ary_Arab,ary
+Egyptian Arabic,arz_Arab,arz
+Assamese,asm_Beng,asm
+Asturian,ast_Latn,ast
+Awadhi,awa_Deva,awa
+Central Aymara,ayr_Latn,ayr
+South Azerbaijani,azb_Arab,azb
+North Azerbaijani,azj_Latn,azj
+Bashkir,bak_Cyrl,bak
+Bambara,bam_Latn,bam
+Balinese,ban_Latn,ban
+Belarusian,bel_Cyrl,bel
+Bemba,bem_Latn,bem
+Bengali,ben_Beng,ben
+Bhojpuri,bho_Deva,bho
+Banjar (Arabic script),bjn_Arab,bjn
+Banjar (Latin script),bjn_Latn,bjn
+Standard Tibetan,bod_Tibt,bod
+Bosnian,bos_Latn,bos
+Buginese,bug_Latn,bug
+Bulgarian,bul_Cyrl,bul
+Catalan,cat_Latn,cat
+Cebuano,ceb_Latn,ceb
+Czech,ces_Latn,ces
+Chokwe,cjk_Latn,cjk
+Central Kurdish,ckb_Arab,ckb
+Crimean Tatar,crh_Latn,crh
+Welsh,cym_Latn,cym
+Danish,dan_Latn,dan
+German,deu_Latn,deu
+Southwestern Dinka,dik_Latn,dik
+Dyula,dyu_Latn,dyu
+Dzongkha,dzo_Tibt,dzo
+Greek,ell_Grek,ell
+English,eng_Latn,eng
+Esperanto,epo_Latn,epo
+Estonian,est_Latn,est
+Basque,eus_Latn,eus
+Ewe,ewe_Latn,ewe
+Faroese,fao_Latn,fao
+Fijian,fij_Latn,fij
+Finnish,fin_Latn,fin
+Fon,fon_Latn,fon
+French,fra_Latn,fra
+Friulian,fur_Latn,fur
+Nigerian Fulfulde,fuv_Latn,fuv
+Scottish Gaelic,gla_Latn,gla
+Irish,gle_Latn,gle
+Galician,glg_Latn,glg
+Guarani,grn_Latn,grn
+Gujarati,guj_Gujr,guj
+Haitian Creole,hat_Latn,hat
+Hausa,hau_Latn,hau
+Hebrew,heb_Hebr,heb
+Hindi,hin_Deva,hin
+Chhattisgarhi,hne_Deva,hne
+Croatian,hrv_Latn,hrv
+Hungarian,hun_Latn,hun
+Armenian,hye_Armn,hye
+Igbo,ibo_Latn,ibo
+Ilocano,ilo_Latn,ilo
+Indonesian,ind_Latn,ind
+Icelandic,isl_Latn,isl
+Italian,ita_Latn,ita
+Javanese,jav_Latn,jav
+Japanese,jpn_Jpan,jpn
+Kabyle,kab_Latn,kab
+Jingpho,kac_Latn,kac
+Kamba,kam_Latn,kam
+Kannada,kan_Knda,kan
+Kashmiri (Arabic script),kas_Arab,kas
+Kashmiri (Devanagari script),kas_Deva,kas
+Georgian,kat_Geor,kat
+Central Kanuri (Arabic script),knc_Arab,knc
+Central Kanuri (Latin script),knc_Latn,knc
+Kazakh,kaz_Cyrl,kaz
+Kabiyè,kbp_Latn,kbp
+Kabuverdianu,kea_Latn,kea
+Khmer,khm_Khmr,khm
+Kikuyu,kik_Latn,kik
+Kinyarwanda,kin_Latn,kin
+Kyrgyz,kir_Cyrl,kir
+Kimbundu,kmb_Latn,kmb
+Northern Kurdish,kmr_Latn,kmr
+Kikongo,kon_Latn,kon
+Korean,kor_Hang,kor
+Lao,lao_Laoo,lao
+Ligurian,lij_Latn,lij
+Limburgish,lim_Latn,lim
+Lingala,lin_Latn,lin
+Lithuanian,lit_Latn,lit
+Lombard,lmo_Latn,lmo
+Latgalian,ltg_Latn,ltg
+Luxembourgish,ltz_Latn,ltz
+Luba-Kasai,lua_Latn,lua
+Ganda,lug_Latn,lug
+Luo,luo_Latn,luo
+Mizo,lus_Latn,lus
+Standard Latvian,lvs_Latn,lvs
+Magahi,mag_Deva,mag
+Maithili,mai_Deva,mai
+Malayalam,mal_Mlym,mal
+Marathi,mar_Deva,mar
+Minangkabau (Latin script),min_Latn,min
+Macedonian,mkd_Cyrl,mkd
+Plateau Malagasy,plt_Latn,plt
+Maltese,mlt_Latn,mlt
+Meitei (Bengali script),mni_Beng,mni
+Halh Mongolian,khk_Cyrl,khk
+Mossi,mos_Latn,mos
+Maori,mri_Latn,mri
+Burmese,mya_Mymr,mya
+Dutch,nld_Latn,nld
+Norwegian Nynorsk,nno_Latn,nno
+Norwegian Bokmål,nob_Latn,nob
+Nepali,npi_Deva,npi
+Northern Sotho,nso_Latn,nso
+Nuer,nus_Latn,nus
+Nyanja,nya_Latn,nya
+Occitan,oci_Latn,oci
+West Central Oromo,gaz_Latn,gaz
+Odia,ory_Orya,ory
+Pangasinan,pag_Latn,pag
+Eastern Panjabi,pan_Guru,pan
+Papiamento,pap_Latn,pap
+Western Persian,pes_Arab,pes
+Polish,pol_Latn,pol
+Portuguese,por_Latn,por
+Dari,prs_Arab,prs
+Southern Pashto,pbt_Arab,pbt
+Ayacucho Quechua,quy_Latn,quy
+Romanian,ron_Latn,ron
+Rundi,run_Latn,run
+Russian,rus_Cyrl,rus
+Sango,sag_Latn,sag
+Sanskrit,san_Deva,san
+Santali,sat_Olck,sat
+Sicilian,scn_Latn,scn
+Shan,shn_Mymr,shn
+Sinhala,sin_Sinh,sin
+Slovak,slk_Latn,slk
+Slovenian,slv_Latn,slv
+Samoan,smo_Latn,smo
+Shona,sna_Latn,sna
+Sindhi,snd_Arab,snd
+Somali,som_Latn,som
+Southern Sotho,sot_Latn,sot
+Spanish,spa_Latn,spa
+Tosk Albanian,als_Latn,als
+Sardinian,srd_Latn,srd
+Serbian,srp_Cyrl,srp
+Swati,ssw_Latn,ssw
+Sundanese,sun_Latn,sun
+Swedish,swe_Latn,swe
+Swahili,swh_Latn,swh
+Silesian,szl_Latn,szl
+Tamil,tam_Taml,tam
+Tatar,tat_Cyrl,tat
+Telugu,tel_Telu,tel
+Tajik,tgk_Cyrl,tgk
+Tagalog,tgl_Latn,tgl
+Thai,tha_Thai,tha
+Tigrinya,tir_Ethi,tir
+Tamasheq (Latin script),taq_Latn,taq
+Tamasheq (Tifinagh script),taq_Tfng,taq
+Tok Pisin,tpi_Latn,tpi
+Tswana,tsn_Latn,tsn
+Tsonga,tso_Latn,tso
+Turkmen,tuk_Latn,tuk
+Tumbuka,tum_Latn,tum
+Turkish,tur_Latn,tur
+Twi,twi_Latn,twi
+Central Atlas Tamazight,tzm_Tfng,tzm
+Uyghur,uig_Arab,uig
+Ukrainian,ukr_Cyrl,ukr
+Umbundu,umb_Latn,umb
+Urdu,urd_Arab,urd
+Northern Uzbek,uzn_Latn,uzn
+Venetian,vec_Latn,vec
+Vietnamese,vie_Latn,vie
+Waray,war_Latn,war
+Wolof,wol_Latn,wol
+Xhosa,xho_Latn,xho
+Eastern Yiddish,ydd_Hebr,ydd
+Yoruba,yor_Latn,yor
+Chinese (Simplified),zho_Hans,zho
+Standard Malay,zsm_Latn,zsm
+Zulu,zul_Latn,zul
+Ambon,abs_Latn,abs
+Batak,btk_Latn,btk
+Betawi,bew_Latn,bew
+Bima,bhp_Latn,bhp
+Madurese,mad_Latn,mad
+Makassarese,mak_Latn,mak
+Palembang,mui_Latn,mui
+Rejang,rej_Latn,rej

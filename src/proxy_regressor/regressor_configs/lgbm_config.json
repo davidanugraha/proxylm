@@ -1,0 +1,21 @@
+{
+    "hpm_search_mode": "grid_search",
+    "cv": 10,
+    "n_iter": 25,
+    "param_space": {
+        "learning_rate": [0.03, 0.1, 0.3],
+        "num_leaves": [16, 32, 64]
+    },
+    "fixed_param": {
+        "n_estimators": 100,
+        "max_bin": 200000,
+        "max_depth": 10,
+        "min_child_weight": 0.001,
+        "min_child_samples": 20,
+        "min_split_gain": 0.0,
+        "colsample_bytree": 1.0,
+        "subsample": 1.0,
+        "reg_alpha": 0.1,
+        "reg_lambda": 0.1
+    }
+}

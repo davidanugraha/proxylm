@@ -1,0 +1,24 @@
+# Ignore archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Ignore unrelated files
+**/.DS_Store
+.DS_Store
+*.bin
+env
+
+# Ignore dataset/experiment folder
+experiments/
+datasets/
+fairseq/
+lang2vec/
+__pycache__
+*.out
+*.log
+*.pt
+*.ckpt
+
+

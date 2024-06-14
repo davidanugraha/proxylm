@@ -1,0 +1,15 @@
+{
+    "cv": 10,
+    "param_space": {
+        "alpha": [0.001, 0.01],
+        "beta_w": [0.1],
+        "beta_h": [0.1],
+        "beta_z": [0.01, 0.1],
+        "beta_s": [0.01],
+        "beta_t": [0.01]
+    },
+    "fixed_param": {
+        "lr_decay": 0.001,
+        "iterations": 2000
+    }
+}

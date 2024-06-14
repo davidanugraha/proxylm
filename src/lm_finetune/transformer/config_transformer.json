@@ -1,0 +1,22 @@
+{
+    "encoder-layers": 6,
+    "decoder-layers": 6,
+    "encoder-embed-dim": 512,
+    "decoder-embed-dim" : 512,
+    "encoder-ffn-embed-dim" : 2048,
+    "decoder-ffn-embed-dim" : 2048,
+    "encoder-attention-heads" : 8,
+    "decoder-attention-heads" : 8,
+    "dropout" : 0.1,
+    "attention-dropout" : 0.1,
+    "relu-dropout": 0.1,
+    "weight-decay": 0.0001,
+    "label-smoothing": 0.1, 
+    "clip-norm": 0, 
+    "warmup-updates": 4000,
+    "lr": 1e-3,
+    "batch-size": 32,
+    "update-freq": 4,
+    "max-epoch": 0,
+    "keep-best-checkpoints": 10
+}

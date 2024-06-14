@@ -1,0 +1,20 @@
+transformers >= 4.19.0
+accelerate
+tokenizers >= 0.15.0
+datasets >= 1.8.0
+sentencepiece != 0.1.92
+protobuf
+sacrebleu >= 2.4.0
+py7zr
+numpy >= 1.23.0
+torch >= 1.10.0
+unbabel-comet
+pandas
+matplotlib
+xgboost
+scikit-learn
+scikit-optimize
+scipy
+plotly
+spacy
+sentence-transformers

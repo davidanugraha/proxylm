@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
 
 from ..utils import *
 from .generic_model import GenericModelPipeline, GenericResultAggregator

@@ -334,15 +334,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
     # Arguments for experiment regressor mode
-    parser.add_argument('-em', '--exp_mode', type=str, required=True, help="Arguments for experiment regressor modes")
-    parser.add_argument('-r', '--regressor', type=str, required=True, help="Regressor name")
+    parser.add_argument('-em', '--exp_mode', type=str, required=True, help="Arguments for experiment regressor modes (random, lolo, seen_unseen, cross_datasset, or incremental)")
+    parser.add_argument('-r', '--regressor', type=str, required=True, help="Regressor name (xgb, lgbm, poly, or mf)")
     parser.add_argument('-rj', '--regressor_json', type=str, required=True, help="JSON path for regressor configuration")
     parser.add_argument('-s', '--score', type=str, default="spBLEU", help="Score name")
     
     # Arguments for model choice
-    parser.add_argument('-d', '--dataset_name', type=str, default="mt560", help="Dataset to be chosen")
-    parser.add_argument('-m', '--model', type=str, required=True, help="Model to be chosen")
-    parser.add_argument('-l', '--lang', type=str, default="all", help="Language for LOLO experiment")
+    parser.add_argument('-d', '--dataset_name', type=str, default="mt560", help="Dataset to be chosen (mt560 or nusa)")
+    parser.add_argument('-m', '--model', type=str, required=True, help="Model to be chosen (m2m100 or nllb)")
+    parser.add_argument('-l', '--lang', type=str, default="all", help="Language for LOLO experiment (all or specific language)")
     args = parser.parse_args()
     
     main(args.exp_mode, args.dataset_name, args.regressor, args.regressor_json, args.model, args.score, args.lang)

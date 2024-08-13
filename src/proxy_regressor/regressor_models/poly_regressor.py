@@ -4,7 +4,7 @@ import json
 # For data processing
 import numpy as np
 from sklearn.model_selection import cross_val_score, KFold, GridSearchCV
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.linear_model import ElasticNet
 from sklearn.pipeline import Pipeline
 

@@ -8,6 +8,7 @@ import numpy as np
 # For models
 from sklearn.model_selection import GridSearchCV
 from lightgbm import LGBMRegressor
+from sklearn.preprocessing import StandardScaler
 
 from skopt import BayesSearchCV
 from skopt.space import Categorical, Real, Integer

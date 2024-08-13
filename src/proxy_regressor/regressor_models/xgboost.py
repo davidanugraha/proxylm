@@ -10,6 +10,7 @@ from sklearn.model_selection import GridSearchCV
 from xgboost import XGBRegressor
 from skopt import BayesSearchCV
 from skopt.space import Categorical, Real, Integer
+from sklearn.preprocessing import StandardScaler
 
 from ..utils import *
 from .generic_model import GenericModelPipeline, GenericResultAggregator

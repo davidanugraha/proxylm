@@ -1,0 +1,3 @@
+cv_rmse,test_rmse,cv_rmse_se,test_rmse_se,train_mt560,nlperf_only,dataset_features,lang_features,with_trfm,with_small100_ft,with_small100_noft,with_model_noft
+7.79743036586739,13.02233512902971,0.014984774737293908,8.917240562319601e-15,True,False,True,True,True,True,True,True
+13.87389184303971,10.979786280316798,0.010547061766448972,2.9724135207732003e-15,True,True,False,False,False,False,False,False

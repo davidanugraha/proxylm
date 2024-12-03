@@ -1,0 +1,3 @@
+cv_rmse,test_rmse,cv_rmse_se,test_rmse_se,nlperf_only,dataset_features,lang_features,with_trfm,with_small100_ft,with_small100_noft,with_model_noft
+0.12029865185771985,0.12435688062525081,0.00038256861899041303,0.0018402717631589463,False,True,True,True,True,True,True
+0.12786677889956632,0.1325081249315503,0.000653268621000415,0.001439235545862026,True,False,False,False,False,False,False

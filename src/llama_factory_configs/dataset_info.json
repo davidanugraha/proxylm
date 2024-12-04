@@ -1,0 +1,32 @@
+{
+    "massive_train_intent": {
+        "hf_hub_url": "mteb/amazon_massive_intent",
+        "columns": {
+            "prompt": "text",
+            "response": "label_text"
+        }
+    },
+    "massive_train_slot": {
+        "hf_hub_url": "AmazonScience/massive",
+        "columns": {
+            "prompt": "utt",
+            "response": "annot_utt"
+        }
+    },
+    "massive_test_intent": {
+        "hf_hub_url": "mteb/amazon_massive_intent",
+        "columns": {
+            "prompt": "text",
+            "response": "label_text"
+        },
+        "split": "test"
+    },
+    "massive_test_slot": {
+        "hf_hub_url": "AmazonScience/massive",
+        "columns": {
+            "prompt": "utt",
+            "response": "annot_utt"
+        },
+        "split": "test"
+    }
+}

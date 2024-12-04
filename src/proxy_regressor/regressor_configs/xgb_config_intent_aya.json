@@ -1,0 +1,31 @@
+{
+    "hpm_search_mode": "bayes_search",
+    "cv": 10,
+    "n_iter": 25,
+    "param_space": {
+        "n_estimators": {
+            "type": "Categorical",
+            "low": 1000,
+            "high": 5000,
+            "step": 250,
+            "prior": "uniform"
+        },
+        "eta": {
+            "type": "Real",
+            "low": 0.01,
+            "high": 0.1,
+            "prior": "log-uniform"
+        }
+    },
+    "fixed_param": {
+        "n_estimators": 4000,
+        "eta": 0.1,
+        "min_child_weight": 4.5,
+        "max_depth": 5,
+        "gamma": 0.1,
+        "subsample": 0.85,
+        "colsample_bytree": 0.8,
+        "reg_alpha": 0.1,
+        "reg_lambda": 0.1
+    }
+}

@@ -1,0 +1,7 @@
+exp_mode: "random"
+regressor: "xgb"
+regressor_config: "src/proxy_regressor/regressor_configs/xgb_config_spBLEU_mt560_m2m100.json"
+score: "spBLEU"
+dataset_name: "mt560"
+model: "m2m100"
+lang: "ind"

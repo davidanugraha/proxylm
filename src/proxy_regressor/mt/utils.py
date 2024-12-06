@@ -25,13 +25,19 @@ np.int = int
 
 SCORE_COLUMNS = ['spBLEU_mean', 'spBLEU_se', 'chrF2++_mean', 'chrF2++_se',
                  'BLEU_mean', 'BLEU_se', 'chrF2_mean', 'chrF2_se',
-                 'TER_mean', 'TER_se', 'comet_score_mean', 'comet_score_se']
+                 'TER_mean', 'TER_se', 'comet_mean', 'comet_se']
 LANG_FEATURES = ["genetic", "geographic", "syntactic", "inventory", "phonological", "featural"]
 
 M2M100_UNSEEN_LANGUAGES = ['asm', 'dik', 'ewe', 'fao', 'hne', 'kab', 'kin', 'kir', 'lmo', 'mri',
                            'sna', 'tat', 'tel', 'tgk', 'tuk', 'uig',
                            'abs', 'btk', 'bew', 'bhp', 'mad', 'mak', 'min']
 NLLB_UNSEEN_LANGUAGES = ['abs', 'btk', 'bew', 'bhp', 'mad', 'mak']
+COMET_LANGUAGES = ['afr', 'amh', 'hye', 'bel', 'mya',
+                   'kat', 'guj', 'hau', 'ind', 'jav',
+                   'kan', 'kaz', 'khm', 'kir', 'plt',
+                   'mar', 'pan', 'snd', 'sin', 'som',
+                   'tam', 'cym', 'xho', 'deu', 'zho',
+                   'fra', 'kor', 'rus', 'vie']
 
 def set_seed_all(seed=RANDOM_SEED):
     random.seed(seed)
@@ -39,9 +45,9 @@ def set_seed_all(seed=RANDOM_SEED):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-def get_all_languages(dataset_name):
+def get_all_languages(dataset_name, score_name="spBLEU"):
     if dataset_name == "mt560":
-        df = get_dataframe_mt560()
+        df = get_dataframe_mt560(score_name)
         all_langs = df["source_lang"].unique()
         all_langs = all_langs.tolist()
         all_langs.remove("eng")
@@ -80,11 +86,14 @@ def get_all_unseen_languages(model_name, dataset_name):
                 unseen_langs_list.append(lang)
         return unseen_langs_list
 
-def get_dataframe_mt560():
+def get_dataframe_mt560(score_name="spBLEU"):
     df = pd.read_csv(MT560_DATA_PATH)
 
     # Dropna 
     df = df.dropna()
+    
+    if score_name == "comet":
+        df = df[(df["source_lang"].isin(COMET_LANGUAGES) | df["target_lang"].isin(COMET_LANGUAGES))]
 
     return df
 
@@ -113,38 +122,38 @@ def get_all_features_combinations():
                   "with_small100_noft": True,
                   "with_model_noft": True})
     
-    # NLPerf features only
-    combs.append({"nlperf_only": True,
-                  "dataset_features": False,
-                  "lang_features": False,
-                  "with_trfm": False,
-                  "with_small100_ft": False,
-                  "with_small100_noft": False,
-                  "with_model_noft": False})
+    # # NLPerf features only
+    # combs.append({"nlperf_only": True,
+    #               "dataset_features": False,
+    #               "lang_features": False,
+    #               "with_trfm": False,
+    #               "with_small100_ft": False,
+    #               "with_small100_noft": False,
+    #               "with_model_noft": False})
 
-    # Define options for proxy models
-    proxy_models_options = [
-        {"with_trfm": False, "with_small100_ft": False, "with_small100_noft": False, "with_model_noft": False},
-        {"with_trfm": True, "with_small100_ft": False, "with_small100_noft": False, "with_model_noft": False},
-        {"with_trfm": False, "with_small100_ft": True, "with_small100_noft": False, "with_model_noft": False},
-        {"with_trfm": False, "with_small100_ft": False, "with_small100_noft": True, "with_model_noft": False},
-        {"with_trfm": False, "with_small100_ft": True, "with_small100_noft": True, "with_model_noft": False},
-        {"with_trfm": False, "with_small100_ft": False, "with_small100_noft": False, "with_model_noft": True}
-    ]
+    # # Define options for proxy models
+    # proxy_models_options = [
+    #     {"with_trfm": False, "with_small100_ft": False, "with_small100_noft": False, "with_model_noft": False},
+    #     {"with_trfm": True, "with_small100_ft": False, "with_small100_noft": False, "with_model_noft": False},
+    #     {"with_trfm": False, "with_small100_ft": True, "with_small100_noft": False, "with_model_noft": False},
+    #     {"with_trfm": False, "with_small100_ft": False, "with_small100_noft": True, "with_model_noft": False},
+    #     {"with_trfm": False, "with_small100_ft": True, "with_small100_noft": True, "with_model_noft": False},
+    #     {"with_trfm": False, "with_small100_ft": False, "with_small100_noft": False, "with_model_noft": True}
+    # ]
     
     
-    for proxy_comb in proxy_models_options:
-        # Dataset and one of proxy models
-        dataset_only = {"nlperf_only": False, "dataset_features": True, "lang_features": False}
-        combs.append({**dataset_only, **proxy_comb})
+    # for proxy_comb in proxy_models_options:
+    #     # Dataset and one of proxy models
+    #     dataset_only = {"nlperf_only": False, "dataset_features": True, "lang_features": False}
+    #     combs.append({**dataset_only, **proxy_comb})
         
-        # Language and one of proxy models
-        lang_only = {"nlperf_only": False, "dataset_features": False, "lang_features": True}
-        combs.append({**lang_only, **proxy_comb})
+    #     # Language and one of proxy models
+    #     lang_only = {"nlperf_only": False, "dataset_features": False, "lang_features": True}
+    #     combs.append({**lang_only, **proxy_comb})
         
-        # Dataset and language and one of proxy models
-        both_dataset_lang = {"nlperf_only": False, "dataset_features": True, "lang_features": True}
-        combs.append({**both_dataset_lang, **proxy_comb})
+    #     # Dataset and language and one of proxy models
+    #     both_dataset_lang = {"nlperf_only": False, "dataset_features": True, "lang_features": True}
+    #     combs.append({**both_dataset_lang, **proxy_comb})
     
     return combs
     
@@ -232,7 +241,7 @@ def get_dataset_random(model_name, dataset_name, score_name="spBLEU", test_size=
                        with_model_noft=True, seed=RANDOM_SEED):
     # Get dataframe and select appropriate features
     if dataset_name == "mt560":
-        df = get_dataframe_mt560()
+        df = get_dataframe_mt560(score_name)
     else:
         df = get_dataframe_nusa(remove_useless_columns=remove_useless_columns)
     
@@ -267,7 +276,7 @@ def get_dataset_lolo(model_name, dataset_name, lang, score_name="spBLEU",
                      with_small100_noft=True, with_model_noft=True, seed=RANDOM_SEED):
     # Get dataframe and select appropriate features
     if dataset_name == "mt560":
-        df = get_dataframe_mt560()
+        df = get_dataframe_mt560(score_name)
     else:
         df = get_dataframe_nusa(remove_useless_columns=remove_useless_columns)
     
@@ -303,7 +312,7 @@ def get_dataset_seen_unseen(model_name, dataset_name, test_langs, score_name="sp
                             with_small100_noft=True, with_model_noft=True, seed=RANDOM_SEED):
     # Get dataframe and select appropriate features
     if dataset_name == "mt560":
-        df = get_dataframe_mt560()
+        df = get_dataframe_mt560(score_name)
     else:
         df = get_dataframe_nusa(remove_useless_columns=remove_useless_columns)
 
@@ -343,11 +352,11 @@ def get_dataset_cross_dataset(model_name, train_mt560, score_name="spBLEU",
                               with_model_noft=True, seed=RANDOM_SEED):
     # Get dataset from corresponding train-test split
     if train_mt560:
-        df_train = get_dataframe_mt560()
+        df_train = get_dataframe_mt560(score_name)
         df_test = get_dataframe_nusa(remove_useless_columns=False)
     else:
         df_train = get_dataframe_nusa(remove_useless_columns=False)
-        df_test = get_dataframe_mt560()
+        df_test = get_dataframe_mt560(score_name)
     
     X_features = select_features(df_train, model_name=model_name, score_name=score_name, include_lang_cols=include_lang_cols,
                                  nlperf_only=nlperf_only, dataset_features=dataset_features,
@@ -372,7 +381,7 @@ def get_incremental_dataset(model_name, dataset_name, train_portion, score_name=
                             remove_useless_columns=True, seed=RANDOM_SEED):
     # Get dataframe and select appropriate features
     if dataset_name == "mt560":
-        df = get_dataframe_mt560()
+        df = get_dataframe_mt560(score_name)
     else:
         df = get_dataframe_nusa(remove_useless_columns=remove_useless_columns)
     

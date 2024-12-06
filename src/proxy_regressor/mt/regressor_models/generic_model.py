@@ -11,15 +11,14 @@ class GenericModelPipeline(ABC):
         pass
 
     @abstractmethod
-    def run_train(self, X_train, Y_train, score_se_df, list_X_tests, seed=RANDOM_SEED):
+    def run_train(self, X_train, Y_train, list_X_tests, seed=RANDOM_SEED):
         """
         Train the model using the preprocessed data with whatever training algorithm used.
 
         Parameters:
         - X_train: Input features
         - Y_train: Target labels
-        - score_se_df: For augmentation
-        - X_test: For augmentationA
+        - list_X_tests: For MF labels
         """
         pass
 

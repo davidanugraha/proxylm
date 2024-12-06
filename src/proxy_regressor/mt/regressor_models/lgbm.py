@@ -90,7 +90,7 @@ class LGBMPipeline(GenericModelPipeline):
         return X_input_scaled
     
     # Main pipeline for training the model
-    def run_train(self, X_train, Y_train, score_se_df, list_X_tests, seed=RANDOM_SEED):
+    def run_train(self, X_train, Y_train, list_X_tests, seed=RANDOM_SEED):
         # Setup scaler for latter transformation
         self.setup_scaler(X_train)
 

@@ -72,7 +72,7 @@ class PolyPipeline(GenericModelPipeline):
         return X_poly
     
     # Main pipeline for training the model
-    def run_train(self, X_train, Y_train, score_se_df, list_X_tests, seed=RANDOM_SEED):
+    def run_train(self, X_train, Y_train, list_X_tests, seed=RANDOM_SEED):
         self.setup_scaler(X_train)
         X_train_scaled = self.scale_dataset(X_train)
         

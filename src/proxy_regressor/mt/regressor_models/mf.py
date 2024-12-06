@@ -271,7 +271,7 @@ class MFPipeline(GenericModelPipeline):
         return side_dict
     
     # Main pipeline for training the model
-    def run_train(self, X_train, Y_train, score_se_df, list_X_tests, seed=RANDOM_SEED):
+    def run_train(self, X_train, Y_train, list_X_tests, seed=RANDOM_SEED):
         def combine_src_lang_and_size(row):
             return f"{row['source_lang']}_{str(int(row['dataset_size']))}"
         

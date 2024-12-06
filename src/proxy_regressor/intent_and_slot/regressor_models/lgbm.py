@@ -7,17 +7,18 @@ import numpy as np
 
 # For models
 from sklearn.model_selection import GridSearchCV
-from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
+from sklearn.preprocessing import StandardScaler
+
 from skopt import BayesSearchCV
 from skopt.space import Categorical, Real, Integer
-from sklearn.preprocessing import StandardScaler
 
 from ..utils import *
 from .generic_model import GenericModelPipeline, GenericResultAggregator
 
-class XGBPipeline(GenericModelPipeline):
-    def __init__(self, model_name, score_name, xgb_json, **kwargs):
-        with open(xgb_json, 'r') as file:
+class LGBMPipeline(GenericModelPipeline):
+    def __init__(self, model_name, score_name, lgbm_json, **kwargs):
+        with open(lgbm_json, 'r') as file:
             json_content = json.load(file)
         
         self.hpm_search_mode = json_content["hpm_search_mode"]
@@ -49,7 +50,6 @@ class XGBPipeline(GenericModelPipeline):
         
         # Cross validation
         self.cv = json_content["cv"]
-        self.y_col_name = f"{model_name}_ft_{score_name}_se"
         
         # Intitialize aggregator
         self.aggregator = GenericResultAggregator()
@@ -59,6 +59,9 @@ class XGBPipeline(GenericModelPipeline):
         
     def aggregate_result_lolo(self, test_source_result, test_target_result, X_columns):
         self.aggregator.aggregate_result_lolo(test_source_result, test_target_result, X_columns)
+        
+    def aggregate_result_lolo_source_only(self, test_source_result, X_columns):
+        self.aggregator.aggregate_result_lolo_source_only(test_source_result, X_columns)
         
     def aggregate_result_list(self, test_result, test_column_names, X_columns):
         self.aggregator.aggregate_result_list(test_result, test_column_names, X_columns)
@@ -78,8 +81,8 @@ class XGBPipeline(GenericModelPipeline):
         self.numerical_columns = list(X_train.columns)
 
         # Identify the numerical indices
-        if 'eng_target' in self.numerical_columns:
-            self.numerical_columns.remove("eng_target")
+        if 'direction_indicator' in self.numerical_columns:
+            self.numerical_columns.remove("direction_indicator")
 
         # Fit the numerical training data
         self.scaler.fit(X_train[self.numerical_columns])
@@ -90,18 +93,22 @@ class XGBPipeline(GenericModelPipeline):
         return X_input_scaled
     
     # Main pipeline for training the model
-    def run_train(self, X_train, Y_train, score_se_df, list_X_tests, seed=RANDOM_SEED):
+    def run_train(self, X_train, Y_train, list_X_tests, seed=RANDOM_SEED):
         # Setup scaler for latter transformation
-        self.setup_scaler(X_train)    
-        X_train_new = self.scale_dataset(X_train)
+        self.setup_scaler(X_train)
+
+        X_train_new = X_train.copy(True)
+        Y_train_new = Y_train.copy(True)
+        X_train_new = self.scale_dataset(X_train_new)
         
-        # Initialize the XGBoost model
-        xgb_model = XGBRegressor(tree_method='auto', random_state=seed, **self.fixed_param)
+        # Initialize the LGBM model
+        lgbm_model = LGBMRegressor(random_state=seed, **self.fixed_param)
+        
         
         if self.hpm_search_mode == "bayes_search":
-            logging.debug('Running XGB Bayes Search')
+            logging.debug('Running LGBM Bayes Search')
             logging.debug(f"Parameter space: {self.param_space}")
-            self.hpm_search_algorithm = BayesSearchCV(estimator=xgb_model,
+            self.hpm_search_algorithm = BayesSearchCV(estimator=lgbm_model,
                                                     search_spaces=self.param_space,
                                                     scoring='neg_mean_squared_error',
                                                     cv=self.cv,
@@ -109,16 +116,16 @@ class XGBPipeline(GenericModelPipeline):
                                                     random_state=seed,
                                                     n_jobs=N_JOBS)
         elif self.hpm_search_mode == "grid_search":
-            logging.debug('Running XGB Grid Search')
+            logging.debug('Running LGBM Grid Search')
             logging.debug(f"Parameter grid: {self.param_space}")
-            self.hpm_search_algorithm = GridSearchCV(estimator=xgb_model,
+            self.hpm_search_algorithm = GridSearchCV(estimator=lgbm_model,
                                                     param_grid=self.param_space,
                                                     scoring='neg_mean_squared_error',
                                                     cv=self.cv,
                                                     n_jobs=N_JOBS)
 
         # Fit the grid search to the data
-        self.hpm_search_algorithm.fit(X_train_new, Y_train)
+        self.hpm_search_algorithm.fit(X_train_new, Y_train_new)
 
         # Get the best model
         self.best_model = self.hpm_search_algorithm.best_estimator_

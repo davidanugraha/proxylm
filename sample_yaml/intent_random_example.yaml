@@ -1,0 +1,6 @@
+exp_mode: "random"
+regressor: "xgb"
+regressor_config: "src/proxy_regressor/regressor_configs/xgb_config_intent_aya.json"
+score: "accuracy"
+dataset_name: "intent"
+model: "aya"

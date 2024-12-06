@@ -1,348 +1,105 @@
-import json
+import yaml
 import argparse
+import logging
+import os
 
-from sklearn.metrics import mean_squared_error
+from .intent_and_slot.run import run_intent_or_slot
+from .mt.run import run_mt
 
-from .utils import *
-from .regressor_models.xgboost import XGBPipeline
-from .regressor_models.lgbm import LGBMPipeline
-from .regressor_models.poly_regressor import PolyPipeline
-from .regressor_models.mf import MFPipeline
+logging.basicConfig(level=logging.DEBUG)
 
-NUM_REPEATS = 5
+CUR_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(os.path.dirname(CUR_DIR))
 
-def init_model_pipeline(regressor_name, model_name, score_name, regressor_json_path):
-    # Parse argument for model to be used
-    if regressor_name == "xgb":
-        # XGBoost
-        return XGBPipeline(model_name, score_name, regressor_json_path)
-    elif regressor_name == "lgbm":
-        # LGBM
-        return LGBMPipeline(model_name, score_name, regressor_json_path)
-    elif regressor_name == "poly":
-        # Poly (any degree depending on config)
-        return PolyPipeline(model_name, score_name, regressor_json_path)
-    elif regressor_name == "mf":
-        # Matrix factorization
-        return MFPipeline(model_name, score_name, regressor_json_path)
-    else:
-        # Raise error argument is not recognized
-        raise ValueError(f"Unsupported regressor type: {regressor_name}")
+VALID_DATASET_NAME = ['mt560', 'nusa', 'intent', 'slot']
+VALID_REGRESSOR_NAME = ['xgb', 'lgbm', 'mf', 'poly']
 
-def run_random(regressor_name, dataset_name, regressor_json_path, model_name, score_name="spBLEU"):
-    logging.debug(f"Running random experiment for estimated model {model_name} on {dataset_name} with scoring {score_name}")
-    
-    full_random_df = pd.DataFrame()
-         
-    # Gather dataset; try all combinations
-    feature_combinations = get_all_features_combinations()
+VALID_MT_MODELS = ['m2m100', 'nllb']
+VALID_MT_EXP_MODE = ['random', 'lolo', 'unseen', 'cross_dataset', 'incremental']
+VALID_INTENT_SLOT_EXP_MODE = ['random', 'lolo']
+VALID_INTENT_SLOT_MODELS = ['aya', 'llama3']
 
-    for feature_combo in feature_combinations:
-        logging.debug(f"Running with features: {feature_combo}")
-        
-        # Initialize model pipeline
-        model_pipeline = init_model_pipeline(regressor_name, model_name, score_name, regressor_json_path)
-        
-        # Hack to include language columns only for MF
-        include_lang_cols = True if regressor_name == "mf" else False
-
-        for i in range(NUM_REPEATS):
-            set_seed_all(i + RANDOM_SEED)
-            X_train, X_test, Y_train, Y_test, score_se_df, X_columns = get_dataset_random(model_name, dataset_name, score_name=score_name, test_size=TEST_SIZE,
-                                                                  include_lang_cols=include_lang_cols,
-                                                                  nlperf_only=feature_combo["nlperf_only"],
-                                                                  dataset_features=feature_combo["dataset_features"],
-                                                                  lang_features=feature_combo["lang_features"],
-                                                                  with_trfm=feature_combo["with_trfm"],
-                                                                  with_small100_ft=feature_combo["with_small100_ft"],
-                                                                  with_small100_noft=feature_combo["with_small100_noft"],
-                                                                  with_model_noft=feature_combo["with_model_noft"],
-                                                                  seed=(i + RANDOM_SEED))
-            
-            # Run train
-            model_pipeline.run_train(X_train, Y_train, score_se_df, [X_test], seed=(i + RANDOM_SEED))
-            
-            # Get prediction
-            Y_pred = model_pipeline.perform_prediction(X_test)
-            
-            # Test
-            test_rmse = np.sqrt(mean_squared_error(Y_test, Y_pred))
-            model_pipeline.aggregate_result(test_rmse, X_columns)
-            
-        # Retrieve aggregated result, pad experiment columns
-        result_df = model_pipeline.retrieve_aggregated_result(X_columns)
-        result_df["nlperf_only"] = feature_combo["nlperf_only"]
-        result_df["dataset_features"] = feature_combo["dataset_features"]
-        result_df["lang_features"] = feature_combo["lang_features"]
-        result_df["with_trfm"] = feature_combo["with_trfm"]
-        result_df["with_small100_ft"] = feature_combo["with_small100_ft"]
-        result_df["with_small100_noft"] = feature_combo["with_small100_noft"]
-        result_df["with_model_noft"] = feature_combo["with_model_noft"]
-
-        full_random_df = pd.concat([full_random_df, result_df], ignore_index=True)
-    
-    full_random_df.to_csv(f'random_results_{score_name}_{model_name}_{dataset_name}_{regressor_name}.csv', index=False)
-
-            
-def run_lolo(regressor_name, dataset_name, regressor_json_path, model_name, score_name="spBLEU", query_lang="all"):
-    logging.debug(f"Running LOLO experiment for estimated model {model_name} on {dataset_name} with scoring {score_name}")
-    
-    full_lolo_df = pd.DataFrame()
-      
-    # Gather dataset; try all combinations
-    feature_combinations = get_all_features_combinations()
-
-    if query_lang == "all":
-        all_langs = get_all_languages(dataset_name=dataset_name)
-    else:
-        all_langs = [query_lang]
-        
-    for lang in all_langs:
-        logging.debug(f"Running LOLO on language {lang}")
-        for feature_combo in feature_combinations:
-            logging.debug(f"Running with features: {feature_combo}")
-            
-            # Initialize model
-            model_pipeline = init_model_pipeline(regressor_name, model_name, score_name, regressor_json_path)
-            
-            # Hack to include language columns only for MF
-            include_lang_cols = True if regressor_name == "mf" else False
-            
-            for i in range(NUM_REPEATS):
-                set_seed_all(i + RANDOM_SEED)
-                X_train, X_test_source, X_test_target, Y_train, Y_test_source, Y_test_target, score_se_df, X_columns = get_dataset_lolo(model_name, dataset_name, lang=lang, score_name=score_name, 
-                                                                            include_lang_cols=include_lang_cols,
-                                                                            nlperf_only=feature_combo["nlperf_only"],
-                                                                            dataset_features=feature_combo["dataset_features"],
-                                                                            lang_features=feature_combo["lang_features"],
-                                                                            with_trfm=feature_combo["with_trfm"],
-                                                                            with_small100_ft=feature_combo["with_small100_ft"],
-                                                                            with_small100_noft=feature_combo["with_small100_noft"],
-                                                                            with_model_noft=feature_combo["with_model_noft"],
-                                                                            seed=(i + RANDOM_SEED))
-                
-                # Run train
-                model_pipeline.run_train(X_train, Y_train, score_se_df, [X_test_source, X_test_target], seed=(i + RANDOM_SEED))
-                
-                # Get prediction
-                Y_pred_source = model_pipeline.perform_prediction(X_test_source)
-                Y_pred_target = model_pipeline.perform_prediction(X_test_target)
-                
-                # Test
-                test_source_rmse = np.sqrt(mean_squared_error(Y_test_source, Y_pred_source))
-                test_target_rmse = np.sqrt(mean_squared_error(Y_test_target, Y_pred_target))
-                model_pipeline.aggregate_result_lolo(test_source_rmse, test_target_rmse, X_columns)
-                
-            # Retrieve aggregated result, pad experiment columns
-            result_df = model_pipeline.retrieve_aggregated_result_lolo(X_columns)
-            result_df["lang"] = lang
-            result_df["nlperf_only"] = feature_combo["nlperf_only"]
-            result_df["dataset_features"] = feature_combo["dataset_features"]
-            result_df["lang_features"] = feature_combo["lang_features"]
-            result_df["with_trfm"] = feature_combo["with_trfm"]
-            result_df["with_small100_ft"] = feature_combo["with_small100_ft"]
-            result_df["with_small100_noft"] = feature_combo["with_small100_noft"]
-            result_df["with_model_noft"] = feature_combo["with_model_noft"]
-            
-            full_lolo_df = pd.concat([full_lolo_df, result_df], ignore_index=True)
-                
-    full_lolo_df.to_csv(f'full_lolo_results_{score_name}_{model_name}_{dataset_name}_{regressor_name}_{query_lang}.csv', index=False)
-    
-def run_seen_unseen(regressor_name, dataset_name, regressor_json_path, model_name, score_name="spBLEU"):
-    logging.debug(f"Running LOLO (Seen-Unseen) experiment for estimated model {model_name} on {dataset_name} with scoring {score_name}")
-    
-    full_seen_unseen_df = pd.DataFrame()
-      
-    # Gather dataset; try all combinations
-    feature_combinations = get_all_features_combinations()
-
-    for train_is_seen in [True, False]:
-        if train_is_seen:
-            test_langs = get_all_unseen_languages(model_name=model_name, dataset_name=dataset_name)
-            logging.debug(f"Running seen languages for unseen languages")
-        else:
-            test_langs = get_all_seen_languages(model_name=model_name, dataset_name=dataset_name)
-            logging.debug(f"Running unseen languages for seen languages")
-            
-        test_column_names = []
-        for lang in test_langs:
-            test_column_names.append(f"test_source_{lang}_rmse")
-            test_column_names.append(f"test_target_{lang}_rmse")
-        
-        for feature_combo in feature_combinations:             
-            logging.debug(f"Running with features: {feature_combo}")
-            
-            # Initialize model
-            model_pipeline = init_model_pipeline(regressor_name, model_name, score_name, regressor_json_path)
-            
-            # Hack to include language columns only for MF
-            include_lang_cols = True if regressor_name == "mf" else False
-            
-            for i in range(NUM_REPEATS):
-                set_seed_all(i + RANDOM_SEED)
-                X_train, list_X_test, Y_train, list_Y_test, score_se_df, X_columns = get_dataset_seen_unseen(model_name, dataset_name, test_langs=test_langs, score_name=score_name,
-                                                                            include_lang_cols=include_lang_cols,
-                                                                            nlperf_only=feature_combo["nlperf_only"],
-                                                                            dataset_features=feature_combo["dataset_features"],
-                                                                            lang_features=feature_combo["lang_features"],
-                                                                            with_trfm=feature_combo["with_trfm"],
-                                                                            with_small100_ft=feature_combo["with_small100_ft"],
-                                                                            with_small100_noft=feature_combo["with_small100_noft"],
-                                                                            with_model_noft=feature_combo["with_model_noft"],
-                                                                            seed=(i + RANDOM_SEED))
-                
-                # Run train
-                model_pipeline.run_train(X_train, Y_train, score_se_df, list_X_test, seed=(i + RANDOM_SEED))
-                
-                # Get prediction for each of test langs
-                test_rmse_list = []
-                for index, X_test in enumerate(list_X_test):
-                    Y_pred = model_pipeline.perform_prediction(X_test)
-                    test_rmse_list.append(np.sqrt(mean_squared_error(Y_pred, list_Y_test[index])))
-                model_pipeline.aggregate_result_list(test_rmse_list, test_column_names, X_columns)
-                
-            # Retrieve aggregated result, pad experiment columns
-            result_df = model_pipeline.retrieve_aggregated_result_list(test_column_names, X_columns)
-            result_df["train_is_seen"] = train_is_seen
-            result_df["nlperf_only"] = feature_combo["nlperf_only"]
-            result_df["dataset_features"] = feature_combo["dataset_features"]
-            result_df["lang_features"] = feature_combo["lang_features"]
-            result_df["with_trfm"] = feature_combo["with_trfm"]
-            result_df["with_small100_ft"] = feature_combo["with_small100_ft"]
-            result_df["with_small100_noft"] = feature_combo["with_small100_noft"]
-            result_df["with_model_noft"] = feature_combo["with_model_noft"]
-            
-            full_seen_unseen_df = pd.concat([full_seen_unseen_df, result_df], ignore_index=True)
-                
-    full_seen_unseen_df.to_csv(f'full_seen_unseen_results_{score_name}_{model_name}_{dataset_name}_{regressor_name}.csv', index=False)
-
-
-def run_cross_dataset(regressor_name, regressor_json_path, model_name, score_name="spBLEU"):
-    logging.debug(f"Running Cross Dataset experiment for estimated model {model_name} with scoring {score_name}")
-    
-    full_cross_dataset_df = pd.DataFrame()
-      
-    # Gather dataset; try all combinations
-    feature_combinations = get_all_features_combinations()
-
-    for train_mt560 in [True]: 
-        for feature_combo in feature_combinations:                
-            logging.debug(f"Running with features: {feature_combo}")
-            
-            # Initialize model
-            model_pipeline = init_model_pipeline(regressor_name, model_name, score_name, regressor_json_path)
-            
-            # Hack to include language columns only for MF
-            include_lang_cols = True if regressor_name == "mf" else False
-            
-            for i in range(NUM_REPEATS):
-                set_seed_all(i + RANDOM_SEED)
-                X_train, X_test, Y_train, Y_test, score_se_df, X_columns = get_dataset_cross_dataset(model_name, train_mt560, score_name=score_name,
-                                                                            include_lang_cols=include_lang_cols,
-                                                                            nlperf_only=feature_combo["nlperf_only"],
-                                                                            dataset_features=feature_combo["dataset_features"],
-                                                                            lang_features=feature_combo["lang_features"],
-                                                                            with_trfm=feature_combo["with_trfm"],
-                                                                            with_small100_ft=feature_combo["with_small100_ft"],
-                                                                            with_small100_noft=feature_combo["with_small100_noft"],
-                                                                            with_model_noft=feature_combo["with_model_noft"],
-                                                                            seed=(i + RANDOM_SEED))
-                
-                # Run train
-                model_pipeline.run_train(X_train, Y_train, score_se_df, [X_test], seed=(i + RANDOM_SEED))
-                
-                # Get prediction
-                Y_pred = model_pipeline.perform_prediction(X_test)
-                
-                # Test
-                test_rmse = np.sqrt(mean_squared_error(Y_test, Y_pred))
-                model_pipeline.aggregate_result(test_rmse, X_columns)
-                
-            # Retrieve aggregated result, pad experiment columns
-            result_df = model_pipeline.retrieve_aggregated_result(X_columns)
-            result_df["train_mt560"] = train_mt560
-            result_df["nlperf_only"] = feature_combo["nlperf_only"]
-            result_df["dataset_features"] = feature_combo["dataset_features"]
-            result_df["lang_features"] = feature_combo["lang_features"]
-            result_df["with_trfm"] = feature_combo["with_trfm"]
-            result_df["with_small100_ft"] = feature_combo["with_small100_ft"]
-            result_df["with_small100_noft"] = feature_combo["with_small100_noft"]
-            result_df["with_model_noft"] = feature_combo["with_model_noft"]
-            
-            full_cross_dataset_df = pd.concat([full_cross_dataset_df, result_df], ignore_index=True)
-                
-    full_cross_dataset_df.to_csv(f'full_cross_dataset_results_{score_name}_{model_name}_{regressor_name}.csv', index=False)
-
-def run_incremental(regressor_name, dataset_name, regressor_json_path, model_name, score_name="spBLEU"):
-    logging.debug(f"Running Incremental experiment for estimated model {model_name} with scoring {score_name}")
-    
-    full_incremental_df = pd.DataFrame()
-      
-    for train_portion in [0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 0.9]:
-        # Initialize model
-        logging.debug(f"Running with train portion of: {train_portion}")
-        model_pipeline = init_model_pipeline(regressor_name, model_name, score_name, regressor_json_path)
-        
-        for i in range(NUM_REPEATS):
-            set_seed_all(i + RANDOM_SEED)
-            X_train, X_test, Y_train, Y_test, score_se_df, X_columns = get_incremental_dataset(model_name, dataset_name, train_portion,
-                                                                                                score_name=score_name,
-                                                                                                seed=(i + RANDOM_SEED))
-            
-            # Run train
-            model_pipeline.run_train(X_train, Y_train, score_se_df, [X_test], seed=(i + RANDOM_SEED))
-            
-            # Get prediction
-            Y_pred = model_pipeline.perform_prediction(X_test)
-            
-            # Test
-            test_rmse = np.sqrt(mean_squared_error(Y_test, Y_pred))
-            model_pipeline.aggregate_result(test_rmse, X_columns)
-            
-        # Retrieve aggregated result, pad experiment columns
-        result_df = model_pipeline.retrieve_aggregated_result(X_columns)
-        result_df["train_portion"] = train_portion
-        result_df["train_regressor_size"] = len(X_train) 
-        
-        full_incremental_df = pd.concat([full_incremental_df, result_df], ignore_index=True)
-                
-    full_incremental_df.to_csv(f'full_incremental_results_{score_name}_{model_name}_{regressor_name}.csv', index=False)
-
-
-def main(exp_mode, dataset_name, regressor_name, regressor_json_path, model_name, score_name, lang="all"):
-    with open(regressor_json_path, 'r') as file:
-        json_content = json.load(file)
-        logging.debug("Regressor json information:")
-        logging.debug(json_content)
-    
-    # Parse argument for experiment mode
-    if exp_mode == "random":
-        run_random(regressor_name, dataset_name, regressor_json_path, model_name, score_name=score_name)
-    elif exp_mode == "lolo":    
-        run_lolo(regressor_name, dataset_name, regressor_json_path, model_name, score_name=score_name, query_lang=lang)
-    elif exp_mode == "seen_unseen":
-        run_seen_unseen(regressor_name, dataset_name, regressor_json_path, model_name, score_name=score_name)
-    elif exp_mode == "cross_dataset":
-        run_cross_dataset(regressor_name, regressor_json_path, model_name, score_name=score_name)
-    elif exp_mode == "incremental":
-        run_incremental(regressor_name, dataset_name, regressor_json_path, model_name, score_name=score_name)
-    else:
-        # Raise error argument is not recognized
-        raise ValueError(f"Unknown experiment mode: {exp_mode}") 
+def load_yaml_config(config_path):
+    """Load a YAML configuration file."""
+    with open(config_path, 'r') as file:
+        try:
+            config = yaml.safe_load(file)
+            return config
+        except yaml.YAMLError as exc:
+            print(f"Error reading YAML config: {exc}")
+            return None
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    
-    # Arguments for experiment regressor mode
-    parser.add_argument('-em', '--exp_mode', type=str, required=True, help="Arguments for experiment regressor modes (random, lolo, seen_unseen, cross_datasset, or incremental)")
-    parser.add_argument('-r', '--regressor', type=str, required=True, help="Regressor name (xgb, lgbm, poly, or mf)")
-    parser.add_argument('-rj', '--regressor_json', type=str, required=True, help="JSON path for regressor configuration")
-    parser.add_argument('-s', '--score', type=str, default="spBLEU", help="Score name")
-    
-    # Arguments for model choice
-    parser.add_argument('-d', '--dataset_name', type=str, default="mt560", help="Dataset to be chosen (mt560 or nusa)")
-    parser.add_argument('-m', '--model', type=str, required=True, help="Model to be chosen (m2m100 or nllb)")
-    parser.add_argument('-l', '--lang', type=str, default="all", help="Language for LOLO experiment (all or specific language)")
+    parser.add_argument('-c', '--config', type=str, required=True, help="Path to the YAML configuration file")
     args = parser.parse_args()
+
+    # Load configuration from YAML
+    config = load_yaml_config(args.config)
+    if not config:
+        raise ValueError("Failed to load configuration. Exiting.")
+
+    # Validate and access configuration parameters
+    regressor_json = config.get('regressor_config')
+    if regressor_json and not os.path.isabs(regressor_json):
+        regressor_json = os.path.join(ROOT_DIR, regressor_json)
+        
+    regressor = config.get('regressor')
+    if regressor not in VALID_REGRESSOR_NAME:
+        raise NotImplementedError(f"Regressor `{regressor}` is not recognized! Valid options are: {VALID_REGRESSOR_NAME}")
     
-    main(args.exp_mode, args.dataset_name, args.regressor, args.regressor_json, args.model, args.score, args.lang)
+    dataset_name = config.get('dataset_name')
+    if dataset_name == "mt560":
+        if regressor == "mf":
+            raise ValueError(f"Matrix factorization (mf) cannot be used for MT560 dataset")
+        score = config.get('score', 'spBLEU')
+
+        model = config.get('model')
+        if model not in VALID_MT_MODELS:
+            raise ValueError(f"Model `{model}` is not recognized! Valid options are: {VALID_MT_MODELS}")
+        
+        exp_mode = config.get('exp_mode')
+        if exp_mode not in VALID_MT_EXP_MODE:
+            raise ValueError(f"Experiment mode `{exp_mode}` is not recognized! Valid options are: {VALID_MT_EXP_MODE}")
+        
+    elif dataset_name == "nusa":
+        score = config.get('score', 'spBLEU')
+        
+        model = config.get('model')
+        if model not in VALID_MT_MODELS:
+            raise ValueError(f"Model `{model}` is not recognized! Valid options are: {VALID_MT_MODELS}")
+        
+        exp_mode = config.get('exp_mode')
+        if exp_mode not in VALID_MT_EXP_MODE:
+            raise ValueError(f"Experiment mode `{exp_mode}` is not recognized! Valid options are: {VALID_MT_EXP_MODE}")
+        
+    elif dataset_name == "intent":
+        score = config.get('score', 'accuracy')
+        
+        model = config.get('model')
+        if model not in VALID_INTENT_SLOT_MODELS:
+            raise ValueError(f"Model `{model}` is not recognized! Valid options are: {VALID_INTENT_SLOT_MODELS}")
+        
+        exp_mode = config.get('exp_mode')
+        if exp_mode not in VALID_INTENT_SLOT_EXP_MODE:
+            raise ValueError(f"Experiment mode `{exp_mode}` is not recognized! Valid options are: {VALID_INTENT_SLOT_EXP_MODE}")
+    elif dataset_name == "slot":
+        score = config.get('score', 'f1')
+        
+        model = config.get('model')
+        if model not in VALID_INTENT_SLOT_MODELS:
+            raise ValueError(f"Model `{model}` is not recognized! Valid options are: {VALID_INTENT_SLOT_MODELS}")
+        
+        exp_mode = config.get('exp_mode')
+        if exp_mode not in VALID_INTENT_SLOT_EXP_MODE:
+            raise ValueError(f"Experiment mode `{exp_mode}` is not recognized! Valid options are: {VALID_INTENT_SLOT_EXP_MODE}")
+    else:
+        raise NotImplementedError(f"Wrong dataset/task! `{dataset_name}` is not recognized! Valid options are: {VALID_DATASET_NAME}")
+    
+    lang = config.get('lang', 'all')
+
+    # Refactoring is required... but maybe when we are less busy ;)
+    if dataset_name in ["mt560", "nusa"]:
+        run_mt(exp_mode, dataset_name, regressor, regressor_json, model, score, lang)
+    elif dataset_name in ["intent", "slot"]:
+        run_intent_or_slot(exp_mode, dataset_name, regressor, regressor_json, model, score, lang)

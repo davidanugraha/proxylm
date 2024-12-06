@@ -25,9 +25,10 @@ Python 3.10 or higher. Details of dependencies are in `setup.py`.
 1. Run `pip install .`. This will install basic dependencies to reproduce ProxyLM's framework. Note that the experimental records are in `src/proxy_regressor/csv_datasets`.
 
 The following steps are **OPTIONAL** for finetuning the language models:
-2. [OPTIONAL] In order to finetune the language models to produce more experimental records, please install additional dependencies through `pip install '.[fairseq, llama-factory]'` depending on the need. We use [fairseq](https://github.com/ritsukkiii/fairseq) to finetune/do inference on Machine Translation (MT), while we use [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) to finetune/do inference for intent classification and slot filling. 
-3. [OPTIONAL] Specifically for MT, run `bash setup_mt_finetune.sh` which will automatically download selected models and our curated dataset for MT. If the model or dataset cannot be downloaded successfully, please refer to section [Dataset Manual Download Links](#dataset-manual-download-links) and [LMs Manual Download Links](#lms-manual-download-links).
-4. [OPTIONAL] Specifically for intent classification and slot filling, replace `dataset_info.json` in `data` at installed LLaMA-Factory library with our version at `src/llama_factory_configs/dataset_info.json` to use MASSIVE dataset.
+
+2. **[OPTIONAL]** In order to finetune the language models to produce more experimental records, please install additional dependencies through `pip install '.[fairseq, llama-factory]'` depending on the need. We use [fairseq](https://github.com/ritsukkiii/fairseq) to finetune/do inference on Machine Translation (MT), while we use [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) to finetune/do inference for intent classification and slot filling. 
+3. **[OPTIONAL]** Specifically for MT, run `bash setup_mt_finetune.sh` which will automatically download selected models and our curated dataset for MT. If the model or dataset cannot be downloaded successfully, please refer to section [Dataset Manual Download Links](#dataset-manual-download-links) and [LMs Manual Download Links](#lms-manual-download-links).
+4. **[OPTIONAL]** Specifically for intent classification and slot filling, replace `dataset_info.json` in `data` at installed LLaMA-Factory library with our version at `src/llama_factory_configs/dataset_info.json` to use MASSIVE dataset.
 
 ## Dataset Manual Download Links
 
